@@ -4,9 +4,9 @@ import pygame
 import os
 import pickle
 from opensimplex import OpenSimplex
-import eq
 from functools import lru_cache
 import equations 
+import calculation
 
 pygame.init()
 simplex = OpenSimplex(seed=42)

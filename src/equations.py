@@ -196,3 +196,4 @@ def calculate_dependent_variables(variables):
         "water_resources": int(water_resources),
         "thirst": int(thirst)
     }
+
