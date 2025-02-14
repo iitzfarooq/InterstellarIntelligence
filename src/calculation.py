@@ -43,7 +43,7 @@ class Engine:
 
 class Normalizer:
     clamp = lambda value, min_val, max_val: min(max(value, min_val), max_val)
-    
+
     def __init__(self, ranges):
         """
         Initializes the ranges dictionary
@@ -51,7 +51,7 @@ class Normalizer:
             ranges (dict): variable names to (min, max) tuples.
         """
         self.ranges = ranges
-    
+
     def clamp_all(self, computed):
         """
         Clamps all the values in the computed dictionary
