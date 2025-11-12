@@ -1,4 +1,4 @@
-#include "space_models.h"
+#include "models.h"
 
 Entity::Entity(u32 id) : id(id) {}
 
@@ -41,4 +41,11 @@ EllipticalOrbit::EllipticalOrbit(
     auto [m, n] = center.shape();
     req(m == 2 && n == 1, "EllipticalOrbit center must be a 2x1 matrix.");
     req(angle >= 0.0f && angle < 2*PI, "EllipticalOrbit angle must be in [0, 2π).");
+}
+
+Artifact::Artifact(u32 id, const Matrix &position) 
+    : Entity(id), position(position) {
+
+    auto [m, n] = position.shape();
+    req(m == 2 && n == 1, "Artifact position must be a 2x1 matrix.");
 }

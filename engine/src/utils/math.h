@@ -118,6 +118,20 @@ inline float dot(Matrix a, Matrix b) {
     return (a.T() * b)(0, 0);
 }
 
+inline bool vecEquals(Matrix a, Matrix b, float epsilon = EPS) {
+    if (a.rows() != b.rows() || a.cols() != b.cols()) {
+        return false;
+    }
+    for (std::size_t i = 0; i < a.rows(); ++i) {
+        for (std::size_t j = 0; j < a.cols(); ++j) {
+            if (!floatEquals(a(i, j), b(i, j), epsilon)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 inline Matrix clamp(const Matrix& mat, float min_val, float max_val) {
     Matrix result(mat.rows(), mat.cols());
     for (std::size_t i = 0; i < mat.rows(); ++i) {
