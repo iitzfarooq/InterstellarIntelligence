@@ -6,8 +6,13 @@
 #include <string>
 #include <stdexcept>
 
-void req(bool condition, const std::string& message) {
+inline void req(bool condition, const std::string& message) {
     if (!condition) {
         throw std::runtime_error(message);
     }
 }
+
+template <typename... ts>
+struct overloaded : ts... {
+    using ts::operator()...;
+};
