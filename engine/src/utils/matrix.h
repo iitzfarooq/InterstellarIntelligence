@@ -6,6 +6,9 @@
 #include <functional>
 #include <cmath>
 #include <utility>
+#include <compare>
+
+#include <nlohmann/json.hpp>
 
 /**
  * A simple matrix class for basic linear algebra operations. 
@@ -51,6 +54,8 @@ public:
     Matrix& operator=(const Matrix&) = default;
     Matrix& operator=(Matrix&&) = default;
     ~Matrix() = default;
+
+    auto operator<=>(const Matrix& other) const = default;
 
 private:
     /**
@@ -98,3 +103,6 @@ Matrix fromHomogeneous(const Matrix& mat);
 Matrix translate2d(float tx, float ty);
 Matrix rotate2d(float angle_rad);
 Matrix scale2d(float sx, float sy);
+
+// JSON serialization for Matrix
+Matrix from_json(const nlohmann::json& j);
