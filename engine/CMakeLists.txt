@@ -1,10 +1,10 @@
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
-find_package(gtest CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 # ---- Engine Core library ----
-file(GLOB ENGINE_SRC "src/*.cpp")
+file(GLOB_RECURSE ENGINE_SRC "src/*.cpp")
 list(FILTER ENGINE_SRC EXCLUDE REGEX "main\\.cpp$")
 
 add_library(engine_core STATIC ${ENGINE_SRC})
@@ -22,5 +22,5 @@ file(GLOB TEST_SRC "tests/*.cpp")
 if (TEST_SRC)
     add_executable(engine_tests ${TEST_SRC})
     target_include_directories(engine_tests PUBLIC src tests)
-    target_link_libraries(engine_tests PRIVATE engine_core gtest::gtest gtest::gtest_main)
+    target_link_libraries(engine_tests PRIVATE GTest::gtest engine_core)
 endif()
