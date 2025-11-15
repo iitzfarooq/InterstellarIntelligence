@@ -29,12 +29,12 @@ struct Entity {
  * Rep-inv: radius > 0, mass > 0. 
  */
 struct CelestialBody : Entity {
-    const float radius;
-    const float mass;
+    const f64 radius;
+    const f64 mass;
 
-    CelestialBody(u32 id, float radius, float mass);
+    CelestialBody(u32 id, f64 radius, f64 mass);
 
-    virtual Matrix pos(float t) const = 0;
+    virtual Matrix pos(f64 t) const = 0;
     virtual ~CelestialBody() = default;
 };
 
@@ -42,11 +42,11 @@ struct OrbitingBody : CelestialBody {
     const std::unique_ptr<const TrajectoryStrategy> trajectory_strategy;
 
     OrbitingBody(
-        u32 id, float radius, float mass,
+        u32 id, f64 radius, f64 mass,
         std::unique_ptr<const TrajectoryStrategy> strategy
     );
 
-    inline Matrix pos(float t) const override { return trajectory_strategy->pos(t); }
+    inline Matrix pos(f64 t) const override { return trajectory_strategy->pos(t); }
 };
 
 /**
@@ -56,9 +56,9 @@ struct OrbitingBody : CelestialBody {
 struct StationaryBody : CelestialBody {
     const Matrix position;
 
-    StationaryBody(u32 id, float radius, float mass, const Matrix& position);
+    StationaryBody(u32 id, f64 radius, f64 mass, const Matrix& position);
 
-    inline Matrix pos(float t) const override { return position; }
+    inline Matrix pos(f64 t) const override { return position; }
 };
 
 /**
@@ -68,12 +68,12 @@ struct StationaryBody : CelestialBody {
 struct WormHole : Entity {
     const Matrix entry;
     const Matrix exit;
-    float t_open;
-    float t_close;
+    f64 t_open;
+    f64 t_close;
 
-    WormHole(u32 id, const Matrix& entry, const Matrix& exit, float t_open, float t_close);
+    WormHole(u32 id, const Matrix& entry, const Matrix& exit, f64 t_open, f64 t_close);
 
-    inline bool isOpen(float t) const {
+    inline bool isOpen(f64 t) const {
         return t >= t_open && t <= t_close;
     }
 };
@@ -87,5 +87,5 @@ struct Artifact : Entity {
 
     Artifact(u32 id, const Matrix& position);
 
-    inline Matrix pos(float t) const { return position; }
+    inline Matrix pos(f64 t) const { return position; }
 };

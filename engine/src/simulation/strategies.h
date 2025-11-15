@@ -12,13 +12,13 @@ struct TrajectoryStrategy {
      * Returns the position of the object in trajectory at time t.
      * Postcondition: returns a 2x1 matrix representing the (x, y) coordinates.
      */
-    virtual Matrix pos(float t) const = 0;
+    virtual Matrix pos(f64 t) const = 0;
 
     /**
      * Returns the velocity of the object in trajectory at time t.
      * Postcondition: returns a 2x1 matrix representing the (vx, vy) components.
      */
-    inline virtual Matrix vel(float t, float delta = 0.001f) const {
+    inline virtual Matrix vel(f64 t, f64 delta = 0.001f) const {
         Matrix pos1 = pos(t);
         Matrix pos2 = pos(t + delta);
         return (pos2 - pos1) * (1.0f / delta);
@@ -39,9 +39,9 @@ struct TrajectoryStrategy {
  *   rotate2d(angle) * [x; y; 1] + center
  */
 struct EllipticalOrbit : public TrajectoryStrategy {
-    const float a, b, omega, phi;
+    const f64 a, b, omega, phi;
     const Matrix center;
-    const float angle;
+    const f64 angle;
 
     /**
      * Rep-inv: 
@@ -49,16 +49,16 @@ struct EllipticalOrbit : public TrajectoryStrategy {
      *   angle is in [0, 2π)
      */
 
-    EllipticalOrbit(float a, float b, float omega, float phi, const Matrix& center, float angle);
+    EllipticalOrbit(f64 a, f64 b, f64 omega, f64 phi, const Matrix& center, f64 angle);
 
     /**
      * Returns the position of the object in elliptical trajectory at time t.
      * Pre: None
      * Post: returns a 2x1 matrix representing the (x, y) coordinates.
      */
-    inline Matrix pos(float t) const override {
-        float x = a * std::cos(omega * t + phi);
-        float y = b * std::sin(omega * t + phi);
+    inline Matrix pos(f64 t) const override {
+        f64 x = a * std::cos(omega * t + phi);
+        f64 y = b * std::sin(omega * t + phi);
 
         Matrix point(3, 1, 1.0f);
         point(0, 0) = x;

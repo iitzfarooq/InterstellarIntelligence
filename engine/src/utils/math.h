@@ -5,14 +5,15 @@
 #include <limits>
 #include <concepts>
 #include "matrix.h"
+#include "types.h"
 
-inline constexpr float PI = 3.14159265358979323846f;
-inline constexpr float EPS = 1e-6f;
-inline constexpr float DEG2RAD = PI / 180.0f;
-inline constexpr float RAD2DEG = 180.0f / PI;
-inline constexpr float G = 6.67430e-11f; // Gravitational constant
-inline constexpr float C = 299792458.0f; // Speed of light in m/s
-inline constexpr float INF = std::numeric_limits<float>::infinity();
+inline constexpr f64 PI = 3.14159265358979323846f;
+inline constexpr f64 EPS = 1e-6f;
+inline constexpr f64 DEG2RAD = PI / 180.0f;
+inline constexpr f64 RAD2DEG = 180.0f / PI;
+inline constexpr f64 G = 6.67430e-11f; // Gravitational constant
+inline constexpr f64 C = 299792458.0f; // Speed of light in m/s
+inline constexpr f64 INF = std::numeric_limits<f64>::infinity();
 
 // Clamp
 template <typename T>
@@ -21,19 +22,19 @@ inline T clamp(T value, T min_val, T max_val) {
     return std::max(min_val, std::min(value, max_val));
 }
 
-inline bool floatEquals(float a, float b, float epsilon = EPS) {
+inline bool f64Equals(f64 a, f64 b, f64 epsilon = EPS) {
     return std::fabs(a - b) < epsilon;
 }
 
-inline float safeDiv(float n, float d, float fallback = 0.0f) {
+inline f64 safeDiv(f64 n, f64 d, f64 fallback = 0.0f) {
     return (std::fabs(d) < EPS) ? fallback : (n / d);
 }
 
-inline float degToRad(float degrees) {
+inline f64 degToRad(f64 degrees) {
     return degrees * DEG2RAD;
 }
 
-inline float radToDeg(float radians) {
+inline f64 radToDeg(f64 radians) {
     return radians * RAD2DEG;
 }
 
@@ -42,7 +43,7 @@ inline float radToDeg(float radians) {
  * Pre: t in [0, 1].
  * Post: returns a when t == 0, b when t == 1. else linearly interpolated value.
  */
-inline float lerp(float a, float b, float t) {
+inline f64 lerp(f64 a, f64 b, f64 t) {
     return a + t * (b - a);
 }
 
@@ -50,8 +51,8 @@ inline float lerp(float a, float b, float t) {
  * Inverse linear interpolation.
  * Post: returns t in [0, 1] such that lerp(a, b, t) == v.
  */
-inline float inverseLerp(float a, float b, float v) {
-    if (floatEquals(a, b)) {
+inline f64 inverseLerp(f64 a, f64 b, f64 v) {
+    if (f64Equals(a, b)) {
         return 0.0f; // Avoid division by zero
     }
     return (v - a) / (b - a);
@@ -64,7 +65,7 @@ inline float inverseLerp(float a, float b, float v) {
  */
 inline Matrix normalized(Matrix vec) {
     auto norm = std::sqrt((vec.T() * vec)(0, 0));
-    if (floatEquals(norm, 0.0f)) {
+    if (f64Equals(norm, 0.0f)) {
         throw std::invalid_argument("Cannot normalize zero vector.");
     }
 
@@ -77,8 +78,8 @@ inline Matrix normalized(Matrix vec) {
 
 inline Matrix round(const Matrix& mat) {
     Matrix result(mat.rows(), mat.cols());
-    for (std::size_t i = 0; i < mat.rows(); ++i) {
-        for (std::size_t j = 0; j < mat.cols(); ++j) {
+    for (size_t i = 0; i < mat.rows(); ++i) {
+        for (size_t j = 0; j < mat.cols(); ++j) {
             result(i, j) = std::round(mat(i, j));
         }
     }
@@ -87,8 +88,8 @@ inline Matrix round(const Matrix& mat) {
 
 inline Matrix ceil(const Matrix& mat) {
     Matrix result(mat.rows(), mat.cols());
-    for (std::size_t i = 0; i < mat.rows(); ++i) {
-        for (std::size_t j = 0; j < mat.cols(); ++j) {
+    for (size_t i = 0; i < mat.rows(); ++i) {
+        for (size_t j = 0; j < mat.cols(); ++j) {
             result(i, j) = std::ceil(mat(i, j));
         }
     }
@@ -97,35 +98,35 @@ inline Matrix ceil(const Matrix& mat) {
 
 inline Matrix floor(const Matrix& mat) {
     Matrix result(mat.rows(), mat.cols());
-    for (std::size_t i = 0; i < mat.rows(); ++i) {
-        for (std::size_t j = 0; j < mat.cols(); ++j) {
+    for (size_t i = 0; i < mat.rows(); ++i) {
+        for (size_t j = 0; j < mat.cols(); ++j) {
             result(i, j) = std::floor(mat(i, j));
         }
     }
     return result;
 }
 
-inline float normp(Matrix M, int p = 2) {
-    float sum = 0.0f;
-    for (std::size_t i = 0; i < M.rows(); ++i) {
-        for (std::size_t j = 0; j < M.cols(); ++j) {
+inline f64 normp(Matrix M, int p = 2) {
+    f64 sum = 0.0f;
+    for (size_t i = 0; i < M.rows(); ++i) {
+        for (size_t j = 0; j < M.cols(); ++j) {
             sum += std::pow(std::fabs(M(i, j)), p);
         }
     }
     return std::pow(sum, 1.0f / p);
 }
 
-inline float dot(Matrix a, Matrix b) {
+inline f64 dot(Matrix a, Matrix b) {
     return (a.T() * b)(0, 0);
 }
 
-inline bool vecEquals(Matrix a, Matrix b, float epsilon = EPS) {
+inline bool vecEquals(Matrix a, Matrix b, f64 epsilon = EPS) {
     if (a.rows() != b.rows() || a.cols() != b.cols()) {
         return false;
     }
-    for (std::size_t i = 0; i < a.rows(); ++i) {
-        for (std::size_t j = 0; j < a.cols(); ++j) {
-            if (!floatEquals(a(i, j), b(i, j), epsilon)) {
+    for (size_t i = 0; i < a.rows(); ++i) {
+        for (size_t j = 0; j < a.cols(); ++j) {
+            if (!f64Equals(a(i, j), b(i, j), epsilon)) {
                 return false;
             }
         }
@@ -133,10 +134,10 @@ inline bool vecEquals(Matrix a, Matrix b, float epsilon = EPS) {
     return true;
 }
 
-inline Matrix clamp(const Matrix& mat, float min_val, float max_val) {
+inline Matrix clamp(const Matrix& mat, f64 min_val, f64 max_val) {
     Matrix result(mat.rows(), mat.cols());
-    for (std::size_t i = 0; i < mat.rows(); ++i) {
-        for (std::size_t j = 0; j < mat.cols(); ++j) {
+    for (size_t i = 0; i < mat.rows(); ++i) {
+        for (size_t j = 0; j < mat.cols(); ++j) {
             result(i, j) = clamp(mat(i, j), min_val, max_val);
         }
     }
@@ -144,7 +145,7 @@ inline Matrix clamp(const Matrix& mat, float min_val, float max_val) {
 }
 
 
-inline float clampAngleDeg(float angle) {
+inline f64 clampAngleDeg(f64 angle) {
     angle = std::fmod(angle, 360.0f);
     if (angle < 0.0f) {
         angle += 360.0f;
@@ -152,7 +153,7 @@ inline float clampAngleDeg(float angle) {
     return angle;
 }
 
-inline float clampAngleRad(float angle) {
+inline f64 clampAngleRad(f64 angle) {
     angle = std::fmod(angle, 2.0f * PI);
     if (angle < 0.0f) {
         angle += 2.0f * PI;
@@ -165,7 +166,7 @@ inline float clampAngleRad(float angle) {
  * Pre: vec in R^2 (2x1 matrix).
  * Post: returns angle in radians in range [-pi, pi].
  */
-inline float angle(Matrix vec) {
+inline f64 angle(Matrix vec) {
     if (vec.rows() != 2 || vec.cols() != 1) {
         throw std::invalid_argument("Angle can only be computed for 2D column vectors.");
     }

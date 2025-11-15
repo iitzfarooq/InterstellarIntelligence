@@ -1,20 +1,25 @@
 #include "matrix.h"
 
-Matrix::Matrix(std::size_t rows, std::size_t cols, float fill)
+Matrix::Matrix(size_t rows, size_t cols, f64 fill)
     : m(rows), n(cols), data_(rows * cols, fill) {}
 
-float& Matrix::operator()(std::size_t i, std::size_t j) {
+Matrix::Matrix(size_t rows, size_t cols, const std::initializer_list<f64>& values) 
+    : m(rows), n(cols), data_(values) {
+    req(values.size() == rows * cols, "Initializer list size does not match matrix dimensions");
+}
+
+f64& Matrix::operator()(size_t i, size_t j) {
     return data_[i * n + j];
 }
 
-const float& Matrix::operator()(std::size_t i, std::size_t j) const {
+const f64& Matrix::operator()(size_t i, size_t j) const {
     return data_[i * n + j];
 }
 
 Matrix Matrix::T() const {
     Matrix result(n, m, 0.0f);
-    for (std::size_t i = 0; i < m; ++i) {
-        for (std::size_t j = 0; j < n; ++j) {
+    for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
             result(j, i) = (*this)(i, j);
         }
     }
@@ -25,29 +30,29 @@ Matrix Matrix::T() const {
 size_t Matrix::hash() const {
     size_t seed = 0;
     for (const auto& val : data_) {
-        seed ^= std::hash<float>()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= std::hash<f64>()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
-    seed ^= std::hash<std::size_t>()(m) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    seed ^= std::hash<std::size_t>()(n) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed ^= std::hash<size_t>()(m) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed ^= std::hash<size_t>()(n) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     return seed;
 }
 
-float Matrix::trace() const {
+f64 Matrix::trace() const {
     if (m != n) {
         throw std::invalid_argument("Trace is only defined for square matrices");
     }
 
-    float tr = 0.0f;
-    for (std::size_t i = 0; i < m; ++i) {
+    f64 tr = 0.0f;
+    for (size_t i = 0; i < m; ++i) {
         tr += (*this)(i, i);
     }
     return tr;
 }
 
-Matrix scale(const Matrix& mat, float scalar) {
+Matrix scale(const Matrix& mat, f64 scalar) {
     Matrix result(mat.rows(), mat.cols(), 0.0f);
-    for (std::size_t i = 0; i < mat.rows(); ++i) {
-        for (std::size_t j = 0; j < mat.cols(); ++j) {
+    for (size_t i = 0; i < mat.rows(); ++i) {
+        for (size_t j = 0; j < mat.cols(); ++j) {
             result(i, j) = mat(i, j) * scalar;
         }
     }
@@ -56,8 +61,8 @@ Matrix scale(const Matrix& mat, float scalar) {
 
 Matrix add(const Matrix& a, const Matrix& b) {
     Matrix result(a.rows(), a.cols(), 0.0f);
-    for (std::size_t i = 0; i < a.rows(); ++i) {
-        for (std::size_t j = 0; j < a.cols(); ++j) {
+    for (size_t i = 0; i < a.rows(); ++i) {
+        for (size_t j = 0; j < a.cols(); ++j) {
             result(i, j) = a(i, j) + b(i, j);
         }
     }
@@ -69,9 +74,9 @@ Matrix mul(const Matrix& a, const Matrix& b) {
         throw std::invalid_argument("Matrix dimensions do not match for multiplication");
     }
     Matrix result(a.rows(), b.cols(), 0.0f);
-    for (std::size_t i = 0; i < a.rows(); ++i) {
-        for (std::size_t j = 0; j < b.cols(); ++j) {
-            for (std::size_t k = 0; k < a.cols(); ++k) {
+    for (size_t i = 0; i < a.rows(); ++i) {
+        for (size_t j = 0; j < b.cols(); ++j) {
+            for (size_t k = 0; k < a.cols(); ++k) {
                 result(i, j) += a(i, k) * b(k, j);
             }
         }
@@ -79,11 +84,11 @@ Matrix mul(const Matrix& a, const Matrix& b) {
     return result;
 }
 
-Matrix operator*(const Matrix& mat, float scalar) {
+Matrix operator*(const Matrix& mat, f64 scalar) {
     return scale(mat, scalar);
 }
 
-Matrix operator*(float scalar, const Matrix& mat) {
+Matrix operator*(f64 scalar, const Matrix& mat) {
     return scale(mat, scalar);
 }
 
@@ -118,7 +123,7 @@ Matrix fromHomogeneous(const Matrix& mat) {
     }
 
     Matrix result(2, 1, 0.0f);
-    float w = mat(2, 0);
+    f64 w = mat(2, 0);
     if (w == 0.0f) {
         throw std::invalid_argument("Homogeneous coordinate w cannot be zero");
     }
@@ -128,29 +133,29 @@ Matrix fromHomogeneous(const Matrix& mat) {
     return result;
 }
 
-Matrix eye(std::size_t size) {
+Matrix eye(size_t size) {
     Matrix result(size, size, 0.0f);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         result(i, i) = 1.0f;
     }
     return result;
 }
 
-Matrix zero(std::size_t rows, std::size_t cols) {
+Matrix zero(size_t rows, size_t cols) {
     return Matrix(rows, cols, 0.0f);
 }
 
-Matrix translate2d(float tx, float ty) {
+Matrix translate2d(f64 tx, f64 ty) {
     Matrix result = eye(3);
     result(0, 2) = tx;
     result(1, 2) = ty;
     return result;
 }
 
-Matrix rotate2d(float angle_rad) {
+Matrix rotate2d(f64 angle_rad) {
     Matrix result = eye(3);
-    float c = std::cos(angle_rad);
-    float s = std::sin(angle_rad);
+    f64 c = std::cos(angle_rad);
+    f64 s = std::sin(angle_rad);
     result(0, 0) = c;
     result(0, 1) = -s;
     result(1, 0) = s;
@@ -158,7 +163,7 @@ Matrix rotate2d(float angle_rad) {
     return result;
 }
 
-Matrix scale2d(float sx, float sy) {
+Matrix scale2d(f64 sx, f64 sy) {
     Matrix result = eye(3);
     result(0, 0) = sx;
     result(1, 1) = sy;

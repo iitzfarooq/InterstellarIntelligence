@@ -3,7 +3,7 @@
 Entity::Entity(u32 id) : id(id) {}
 
 WormHole::WormHole(
-    u32 id, const Matrix &entry, const Matrix &exit, float t_open, float t_close
+    u32 id, const Matrix &entry, const Matrix &exit, f64 t_open, f64 t_close
 )   : Entity(id), entry(entry), exit(exit), t_open(t_open), t_close(t_close) {
     req(t_open < t_close, "WormHole t_open must be less than t_close.");
     auto [m1, n1] = entry.shape();
@@ -12,28 +12,28 @@ WormHole::WormHole(
     req(m2 == 2 && n2 == 1, "WormHole exit must be a 2x1 matrix.");
 }
 
-CelestialBody::CelestialBody(u32 id, float radius, float mass)
+CelestialBody::CelestialBody(u32 id, f64 radius, f64 mass)
 : Entity(id), radius(radius), mass(mass) {
     req(radius > 0.0f, "CelestialBody radius must be positive.");
     req(mass > 0.0f, "CelestialBody mass must be positive.");
 }
 
 StationaryBody::StationaryBody(
-    u32 id, float radius, float mass, const Matrix &position
+    u32 id, f64 radius, f64 mass, const Matrix &position
 )   : CelestialBody(id, radius, mass), position(position) {}
 
 OrbitingBody::OrbitingBody(
-    u32 id, float radius, float mass, std::unique_ptr<const OrbitStrategy> strategy
-)   : CelestialBody(id, radius, mass), orbit_strategy(std::move(strategy)) {
-        req(orbit_strategy != nullptr, "OrbitingBody requires a valid OrbitStrategy.");
+    u32 id, f64 radius, f64 mass, std::unique_ptr<const TrajectoryStrategy> strategy
+)   : CelestialBody(id, radius, mass), trajectory_strategy(std::move(strategy)) {
+        req(trajectory_strategy != nullptr, "OrbitingBody requires a valid TrajectoryStrategy.");
 }
 
 EllipticalOrbit::EllipticalOrbit(
-    float a, float b,
-    float omega,
-    float phi,
+    f64 a, f64 b,
+    f64 omega,
+    f64 phi,
     const Matrix &center,
-    float angle
+    f64 angle
 )   : center(center), a(a), b(b), omega(omega), phi(phi), angle(angle) {
     req(a > 0.0f, "EllipticalOrbit semi-major axis a must be positive.");
     req(b > 0.0f, "EllipticalOrbit semi-minor axis b must be positive.");

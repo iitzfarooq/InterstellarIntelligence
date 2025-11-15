@@ -7,12 +7,14 @@
 #include <cmath>
 #include <utility>
 #include <compare>
+#include <initializer_list>
 
-#include <nlohmann/json.hpp>
+#include "utils/types.h"
+#include "utils/helpers.h"
 
 /**
  * A simple matrix class for basic linear algebra operations. 
- * Represents a matrix of floats with m rows and n columns.
+ * Represents a matrix of f64s with m rows and n columns.
  * Abstraction function:
  * Matrix(m, n, fill) represents an m x n matrix where each element is initialized to 'fill'. Requires m,n > 0.
  * The element at row i and column j is accessed via operator()(i, j).
@@ -20,15 +22,16 @@
  */
 class Matrix {
 public:
-    Matrix(std::size_t rows, std::size_t cols, float fill = 0.0f);
+    Matrix(size_t rows, size_t cols, f64 fill = 0.0f);
+    Matrix(size_t rows, size_t cols, const std::initializer_list<f64>& values);
 
-    virtual float& operator()(std::size_t i, std::size_t j);
-    virtual const float& operator()(std::size_t i, std::size_t j) const;
+    virtual f64& operator()(size_t i, size_t j);
+    virtual const f64& operator()(size_t i, size_t j) const;
 
-    virtual inline std::size_t rows() const { return m; }
-    virtual inline std::size_t cols() const { return n; }
+    virtual inline size_t rows() const { return m; }
+    virtual inline size_t cols() const { return n; }
 
-    inline std::pair<std::size_t, std::size_t> shape() const {
+    inline std::pair<size_t, size_t> shape() const {
         return {m, n};
     }
 
@@ -41,7 +44,7 @@ public:
      * Precondition: matrix must be square (m == n).
      * Throws std::invalid_argument if the matrix is not square.
      */
-    float trace() const;
+    f64 trace() const;
 
     /**
      * Returns a hash value for the matrix.
@@ -64,29 +67,29 @@ private:
      * - data_.size() == m * n, m -> rows, n -> columns
      */
 
-    std::vector<float> data_;
-    std::size_t m, n;
+    std::vector<f64> data_;
+    size_t m, n;
 };
 
-Matrix scale(const Matrix& mat, float scalar);
+Matrix scale(const Matrix& mat, f64 scalar);
 Matrix add(const Matrix& a, const Matrix& b);
 Matrix mul(const Matrix& a, const Matrix& b);
 
-Matrix operator*(const Matrix& mat, float scalar);
-Matrix operator*(float scalar, const Matrix& mat);
+Matrix operator*(const Matrix& mat, f64 scalar);
+Matrix operator*(f64 scalar, const Matrix& mat);
 Matrix operator+(const Matrix& a, const Matrix& b);
 Matrix operator-(const Matrix& a, const Matrix& b);
 Matrix operator*(const Matrix& a, const Matrix& b);
 
 template <>
 struct std::hash<Matrix> {
-    inline std::size_t operator()(const Matrix& mat) const {
+    inline size_t operator()(const Matrix& mat) const {
         return mat.hash();
     }
 };
 
-Matrix eye(std::size_t size);
-Matrix zero(std::size_t rows, std::size_t cols);
+Matrix eye(size_t size);
+Matrix zero(size_t rows, size_t cols);
 
 /**
  * Given a 2x1 matrix, convert it to a 3x1 homogeneous coordinate matrix.
@@ -102,9 +105,6 @@ Matrix fromHomogeneous(const Matrix& mat);
  * Following functions create 3x3 affine transformation matrices.
  *************************************************************** */
 
-Matrix translate2d(float tx, float ty);
-Matrix rotate2d(float angle_rad);
-Matrix scale2d(float sx, float sy);
-
-// JSON serialization for Matrix
-Matrix from_json(const nlohmann::json& j);
+Matrix translate2d(f64 tx, f64 ty);
+Matrix rotate2d(f64 angle_rad);
+Matrix scale2d(f64 sx, f64 sy);

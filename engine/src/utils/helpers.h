@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <set>
 
-inline void req(bool condition, const std::string& message) {
+inline void req(bool condition, const std::string& message = "Requirement failed") {
     if (!condition) {
         throw std::runtime_error(message);
     }
