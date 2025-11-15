@@ -83,8 +83,16 @@ Matrix operator*(const Matrix& mat, float scalar) {
     return scale(mat, scalar);
 }
 
+Matrix operator*(float scalar, const Matrix& mat) {
+    return scale(mat, scalar);
+}
+
 Matrix operator+(const Matrix& a, const Matrix& b) {
     return add(a, b);
+}
+
+Matrix operator-(const Matrix& a, const Matrix& b) {
+    return add(a, scale(b, -1.0f));
 }
 
 Matrix operator*(const Matrix& a, const Matrix& b) {

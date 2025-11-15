@@ -13,6 +13,17 @@ struct OrbitStrategy {
      * Postcondition: returns a 2x1 matrix representing the (x, y) coordinates.
      */
     virtual Matrix pos(float t) const = 0;
+
+    /**
+     * Returns the velocity of the object in orbit at time t.
+     * Postcondition: returns a 2x1 matrix representing the (vx, vy) components.
+     */
+    inline virtual Matrix vel(float t, float delta = 0.001f) const {
+        Matrix pos1 = pos(t);
+        Matrix pos2 = pos(t + delta);
+        return (pos2 - pos1) * (1.0f / delta);
+    }
+
     virtual ~OrbitStrategy() = default;
 };
 

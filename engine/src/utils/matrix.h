@@ -73,7 +73,9 @@ Matrix add(const Matrix& a, const Matrix& b);
 Matrix mul(const Matrix& a, const Matrix& b);
 
 Matrix operator*(const Matrix& mat, float scalar);
+Matrix operator*(float scalar, const Matrix& mat);
 Matrix operator+(const Matrix& a, const Matrix& b);
+Matrix operator-(const Matrix& a, const Matrix& b);
 Matrix operator*(const Matrix& a, const Matrix& b);
 
 template <>
