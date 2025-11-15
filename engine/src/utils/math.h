@@ -11,6 +11,7 @@ inline constexpr float EPS = 1e-6f;
 inline constexpr float DEG2RAD = PI / 180.0f;
 inline constexpr float RAD2DEG = 180.0f / PI;
 inline constexpr float G = 6.67430e-11f; // Gravitational constant
+inline constexpr float C = 299792458.0f; // Speed of light in m/s
 inline constexpr float INF = std::numeric_limits<float>::infinity();
 
 // Clamp
@@ -104,11 +105,11 @@ inline Matrix floor(const Matrix& mat) {
     return result;
 }
 
-inline float normp(Matrix vec, int p = 2) {
+inline float normp(Matrix M, int p = 2) {
     float sum = 0.0f;
-    for (std::size_t i = 0; i < vec.rows(); ++i) {
-        for (std::size_t j = 0; j < vec.cols(); ++j) {
-            sum += std::pow(std::fabs(vec(i, j)), p);
+    for (std::size_t i = 0; i < M.rows(); ++i) {
+        for (std::size_t j = 0; j < M.cols(); ++j) {
+            sum += std::pow(std::fabs(M(i, j)), p);
         }
     }
     return std::pow(sum, 1.0f / p);

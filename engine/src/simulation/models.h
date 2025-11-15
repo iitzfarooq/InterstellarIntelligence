@@ -39,14 +39,14 @@ struct CelestialBody : Entity {
 };
 
 struct OrbitingBody : CelestialBody {
-    const std::unique_ptr<const OrbitStrategy> orbit_strategy;
+    const std::unique_ptr<const TrajectoryStrategy> trajectory_strategy;
 
     OrbitingBody(
         u32 id, float radius, float mass,
-        std::unique_ptr<const OrbitStrategy> strategy
+        std::unique_ptr<const TrajectoryStrategy> strategy
     );
 
-    inline Matrix pos(float t) const override { return orbit_strategy->pos(t); }
+    inline Matrix pos(float t) const override { return trajectory_strategy->pos(t); }
 };
 
 /**
