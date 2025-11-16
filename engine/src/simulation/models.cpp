@@ -49,3 +49,18 @@ Artifact::Artifact(u32 id, const Matrix &position)
     auto [m, n] = position.shape();
     req(m == 2 && n == 1, "Artifact position must be a 2x1 matrix.");
 }
+
+Spacecraft::Spacecraft(
+    u32 id, f64 mass, f64 fuel, f64 min_fuel_to_land,
+        const std::vector<f64>& thrust_levels, f64 exhaust_velocity
+)   : Entity(id), mass(mass), fuel(fuel), min_fuel_to_land(min_fuel_to_land), 
+    thrust_levels(thrust_levels), exhaust_velocity(exhaust_velocity) {
+        
+    req(mass > 0.0f, "Spacecraft mass must be positive.");
+    req(fuel >= 0.0f, "Spacecraft fuel cannot be negative.");
+    req(!thrust_levels.empty(), "Spacecraft thrust_levels cannot be empty.");
+    for (const auto& level : thrust_levels) {
+        req(level > 0.0f, "Each thrust level must be positive.");
+    }
+    req(exhaust_velocity > 0.0f, "Spacecraft exhaust_velocity must be positive.");
+}

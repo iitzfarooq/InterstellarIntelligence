@@ -4,8 +4,8 @@
 #include <numeric>
 #include <limits>
 #include <concepts>
-#include "matrix.h"
-#include "types.h"
+#include "utils/matrix.h"
+#include "utils/types.h"
 
 inline constexpr f64 PI = 3.14159265358979323846f;
 inline constexpr f64 EPS = 1e-12f;
@@ -21,37 +21,38 @@ inline constexpr f64 INF = std::numeric_limits<f64>::infinity();
  * Provides constants, helpers, tolerances, and settings for mathematical operations.
  */
 struct MathConfig {
-    const f64 epsilon = EPS; 
-    const f64 pi = PI;
-    const f64 infinity = INF;
-    const f64 G = G;
-    const f64 c = C;
+    static constexpr f64 epsilon = EPS; 
+    static constexpr f64 pi = PI;
+    static constexpr f64 infinity = INF;
+    static constexpr f64 G = G;
+    static constexpr f64 c = C;
 
     MathConfig() = default;
+    virtual ~MathConfig() = default;
 
     // Common numerical operations
 
-    inline virtual f64 degToRad(f64 degrees) const {
+    static inline f64 degToRad(f64 degrees)  {
         return degrees * DEG2RAD;
     }
     
-    inline virtual f64 radToDeg(f64 radians) const {
+    static inline f64 radToDeg(f64 radians)  {
         return radians * RAD2DEG;
     }
 
-    inline virtual bool floatEquals(f64 a, f64 b) const {
+    static inline bool floatEquals(f64 a, f64 b)  {
         return std::fabs(a - b) < epsilon;
     }
 
-    inline virtual f64 safeDiv(f64 n, f64 d, f64 fallback = 0.0f) const {
+    static inline f64 safeDiv(f64 n, f64 d, f64 fallback = 0.0f)  {
         return (std::fabs(d) < epsilon) ? fallback : (n / d);
     }
 
-    inline virtual f64 epsilonDiv(f64 n, f64 d) const {
+    static inline f64 epsilonDiv(f64 n, f64 d)  {
         return n / (d + epsilon);
     }
 
-    inline virtual f64 clampAngleDeg(f64 angle) const {
+    static inline f64 clampAngleDeg(f64 angle)  {
         angle = std::fmod(angle, 360.0f);
         if (angle < 0.0f) {
             angle += 360.0f;
@@ -59,7 +60,7 @@ struct MathConfig {
         return angle;
     }
 
-    inline virtual f64 clampAngleRad(f64 angle) const {
+    static inline f64 clampAngleRad(f64 angle)  {
         angle = std::fmod(angle, 2.0f * pi);
         if (angle < 0.0f) {
             angle += 2.0f * pi;
@@ -69,7 +70,7 @@ struct MathConfig {
 
     // Operations related to vectors
 
-    inline virtual f64 normp(Matrix v, int p = 2) const {
+    static inline f64 normp(Matrix v, int p = 2)  {
         f64 sum = 0.0f;
         for (size_t i = 0; i < v.rows(); ++i) {
             sum += std::pow(std::fabs(v(i, 0)), p);
@@ -77,16 +78,33 @@ struct MathConfig {
         return std::pow(sum, 1.0f / p);
     }
 
-    inline virtual Matrix normalized(Matrix v) const {
+    static inline Matrix normalized(Matrix v)  {
         auto n = normp(v, 2);
-        if (floatEquals(n, 0.0f)) {
+        if (MathConfig::floatEquals(n, 0.0f)) {
             throw std::invalid_argument("Cannot normalize zero vector.");
         }
         return v * (1.0f / n);
     }
 
-    inline virtual f64 dot(Matrix a, Matrix b) const {
+    static inline f64 dot(Matrix a, Matrix b)  {
         return (a.T() * b)(0, 0);
+    }
+
+    // Numerical integration using 4th-order Runge-Kutta method
+
+    template <typename T>
+    static inline T integrate(
+        const T& x0,
+        double t, 
+        double dt,
+        const std::function<T(const T&, double)>& f
+    )  {
+        T k1 = f(x0, t);
+        T k2 = f(x0 + k1 * (dt / 2.0), t + dt / 2.0);
+        T k3 = f(x0 + k2 * (dt / 2.0), t + dt / 2.0);
+        T k4 = f(x0 + k3 * dt, t + dt);
+
+        return x0 + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
     }
 
     // more to be added later.

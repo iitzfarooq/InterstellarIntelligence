@@ -89,3 +89,17 @@ struct Artifact : Entity {
 
     inline Matrix pos(f64 t) const { return position; }
 };
+
+struct Spacecraft : Entity {
+    const f64 mass; // excluding the fuel
+    const f64 fuel;
+    const std::vector<f64> thrust_levels;
+    const f64 exhaust_velocity;
+
+    const f64 min_fuel_to_land;
+
+    Spacecraft(
+        u32 id, f64 mass, f64 fuel, f64 min_fuel_to_land,
+        const std::vector<f64>& thrust_levels, f64 exhaust_velocity
+    );
+};

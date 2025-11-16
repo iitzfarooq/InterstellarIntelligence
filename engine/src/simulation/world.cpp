@@ -195,6 +195,7 @@ SimpleTimePolicy::SimpleTimePolicy(
 ) : SimpleTimePolicy::TimePolicy(env_model, tmax, dt_u) {}
 
 f64 SimpleTimePolicy::toProper(f64 dt_u, const Matrix& position, const Matrix& velocity, f64 t_u) const {
+    // Euler integration
     f64 dt_p = 0.0;
     f64 step = 0.01;
 
@@ -207,6 +208,7 @@ f64 SimpleTimePolicy::toProper(f64 dt_u, const Matrix& position, const Matrix& v
 }
 
 f64 SimpleTimePolicy::toGlobal(f64 dt_p, const Matrix& position, const Matrix& velocity, f64 t_u) const {
+    // Euler integration
     f64 dt_u = 0.0;
     f64 step = 0.01;
 
