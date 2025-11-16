@@ -12,7 +12,20 @@
 #include "utils/matrix.h"
 #include "utils/helpers.h"
 #include "simulation/models.h"
-#include "simulation/strategies.h"
+
+template <typename T>
+using shared_span = std::span<std::shared_ptr<T>>;
+
+template <typename T>
+using const_shared_span = std::span<const std::shared_ptr<T>>;
+
+template <typename T>
+using shared_vec = std::vector<std::shared_ptr<T>>;
+
+// Below alias is not valid. std::vector<const T> is not allowed.
+// Reason: std::vector requires its elements to be assignable, and const T is not assignable.
+// template <typename T>
+// using const_shared_vec = std::vector<std::shared_ptr<const T>>;
 
 /**
  * Defines the world in which the simulation takes place.
@@ -21,9 +34,9 @@
 class WorldData {
 public:
     WorldData(
-        std::vector<const CelestialBody> bodies,
-        std::vector<const WormHole> wormholes,
-        std::vector<const Artifact> artifacts
+        shared_vec<CelestialBody> bodies,
+        shared_vec<WormHole> wormholes,
+        shared_vec<Artifact> artifacts
     );
 
     /**
@@ -32,19 +45,22 @@ public:
      * Elsewise, returns all entities of that type.
      */
 
-    std::span<const CelestialBody> bodies(i32 id = -1) const;
-    std::span<const WormHole> wormholes(i32 id = -1) const;
-    std::span<const Artifact> artifacts(i32 id = -1) const;
+    const shared_vec<CelestialBody>& bodies(i32 id = -1) const;
+    const shared_vec<WormHole>& wormholes(i32 id = -1) const;
+    const shared_vec<Artifact>& artifacts(i32 id = -1) const;
 
 private:
-    std::vector<const CelestialBody> bodies_;
-    std::vector<const WormHole> wormholes_;
-    std::vector<const Artifact> artifacts_;
+    shared_vec<CelestialBody> bodies_;
+    shared_vec<WormHole> wormholes_;
+    shared_vec<Artifact> artifacts_;
 };
 
+/**
+ * Models the environmental effects in the world, such as gravity and time dilation.
+ */
 class EnvironmentModel {
 public:
-    EnvironmentModel(const WorldData& world_data);
+    EnvironmentModel(const WorldData& world_data, const MathConfig& math_config);
 
     /**
      * Returns the gravitational acceleration at the given position and global time.
@@ -52,32 +68,47 @@ public:
      * Post: returns a 2x1 matrix representing the (gx, gy) components
      */
     virtual Matrix gravity(
-        const Matrix& position, float t_u
-    ) const;
+        const Matrix& position, f64 t_u
+    ) const = 0;
     /**
      * Returns the gravitational potential at the given position and global time.
      * Pre: position is a 2x1 matrix representing (x, y) coordinates
      * Post: returns the gravitational potential (a scalar)
      */
-    virtual float potential(
-        const Matrix& position, float t_u
-    ) const;
+    virtual f64 potential(
+        const Matrix& position, f64 t_u
+    ) const = 0;
     /**
      * Returns the time dilation factor (gamma) at the given position, velocity, and global time.
      * Pre: position and velocity are 2x1 matrices representing (x, y) and (vx, vy) respectively.
-     * Post: returns the time dilation factor (a scalar) (dt_proper / dt_global)
+     * Post: returns the time dilation factor (a scalar) (dt_global / dt_proper)
      */
-    virtual float gamma(
-        const Matrix& position, const Matrix& velocity, float t_u
-    ) const;
+    virtual f64 gamma(
+        const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const = 0;
+
+    /**
+     * Returns the inverse of the time dilation factor (1 / gamma).
+     * Pre: position and velocity are 2x1 matrices representing (x, y) and (vx, vy) respectively.
+     * Post: returns the inverse time dilation factor (a scalar) (dt_proper / dt_global)
+     */
+    virtual f64 invGamma(
+        const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const = 0;
+
+    virtual ~EnvironmentModel() = default;
 
 protected:
     const WorldData& world_data_;
+    const MathConfig& math_config_;
 };
 
+/**
+ * Spatial index for efficient querying of entities in the world.
+ */
 class WorldIndex {
 public:
-    WorldIndex(const WorldData& world_data);
+    WorldIndex(const WorldData& world_data, const MathConfig& math_config);
 
     /**
      * Returns entities within the specified radius of the given position at time t_u.
@@ -85,69 +116,77 @@ public:
      * Post: returns spans of entities within the radius
      */
     
-    virtual std::span<const CelestialBody> queryCelestials(
+    virtual const shared_vec<CelestialBody> queryCelestials(
         const Matrix& position,
-        float radius, 
-        float t_u
-    );
+        f64 radius, 
+        f64 t_u
+    ) const = 0;
+    
+    virtual const shared_vec<WormHole> queryWormHoles(
+        const Matrix& position,
+        f64 radius,
+        f64 t_u
+    ) const = 0;
+    
+    virtual const shared_vec<Artifact> queryArtifacts(
+        const Matrix& position,
+        f64 radius,
+        f64 t_u
+    ) const = 0;
 
-    virtual std::span<const WormHole> queryWormHoles(
-        const Matrix& position,
-        float radius,
-        float t_u
-    );
-
-    virtual std::span<const Artifact> queryArtifacts(
-        const Matrix& position,
-        float radius,
-        float t_u
-    );
+    virtual ~WorldIndex() = default;
 
 protected:
     const WorldData& world_data_;
+    const MathConfig& math_config_;
 };
 
+/**
+ * Manages time conversions between global and proper time in the world.
+ */
 class TimePolicy {
 public:
-    TimePolicy(const EnvironmentModel& env_model, float tmax, float dt_u = 1.0f);
+    TimePolicy(const EnvironmentModel& env_model, f64 tmax, f64 dt_u = 1.0f);
 
-    virtual float toProper(
-        float t_u, const Matrix& position, const Matrix& velocity
-    ) const;
-    virtual float toGlobal(
-        float t_p, const Matrix& position, const Matrix& velocity
-    ) const;
+    virtual f64 toProper(
+        f64 dt_u, const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const = 0;
+    virtual f64 toGlobal(
+        f64 dt_p, const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const = 0;
     
-    virtual float tmax() const;
-    inline float dtu() const { return dt_u_; }
+    inline virtual f64 tmax() const { return tmax_; }
+    inline virtual f64 dtu() const { return dt_u_; }
+
+    virtual ~TimePolicy() = default;
 
 protected:
-    float dt_u_;
-    float tmax_;
+    f64 dt_u_;
+    f64 tmax_;
 
     const EnvironmentModel& env_model_;
 };
 
 struct ShipFrame {
     Matrix x, v;
-    float fuel;
-    float t_p; 
+    f64 fuel;
+    f64 t_p; 
     std::set<int> collected_artifacts;
 };
 
 struct BodyFrame {
     int id;
     Matrix x;
-    float radius;
-    float mass;
+    f64 radius;
+    f64 mass;
 };
 
 struct WormHoleFrame {
     int id;
     Matrix entry;
     Matrix exit;
-    float t_open;
-    float t_close;
+    f64 t_open;
+    f64 t_close;
 };
 
 struct ArtifactFrame {
@@ -156,9 +195,63 @@ struct ArtifactFrame {
 };
 
 struct WorldFrame {
-    float t_u;
+    f64 t_u;
     ShipFrame ship;
     std::vector<BodyFrame> bodies;
     std::vector<WormHoleFrame> wormholes;
     std::vector<ArtifactFrame> artifacts;
 };
+
+/**
+ * The namespace contains reference implementations of the above abstract classes. 
+ */
+namespace ref {
+
+class ConcreteEnvironment : public ::EnvironmentModel {
+public:
+    explicit ConcreteEnvironment(const WorldData&, const MathConfig&);
+
+    Matrix gravity(
+        const Matrix& position, f64 t_u
+    ) const override;
+    f64 potential(
+        const Matrix& position, f64 t_u
+    ) const override;
+    f64 gamma(
+        const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const override;
+    f64 invGamma(
+        const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const override;
+};
+
+class NaiveWorldIndex : public ::WorldIndex {
+public:
+    explicit NaiveWorldIndex(
+        const WorldData& world_data, const MathConfig& math_config
+    );
+
+    const shared_vec<CelestialBody> queryCelestials(
+        const Matrix& position, f64 radius, f64 t_u
+    ) const override;
+    const shared_vec<WormHole> queryWormHoles(
+        const Matrix& position, f64 radius, f64 t_u
+    ) const override;
+    const shared_vec<Artifact> queryArtifacts(
+        const Matrix& position, f64 radius, f64 t_u
+    ) const override;
+};
+
+class SimpleTimePolicy : public ::TimePolicy {
+public:
+    SimpleTimePolicy(const EnvironmentModel& env_model, f64 tmax, f64 dt_u = 1.0f);
+
+    f64 toProper(
+        f64 dt_u, const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const override;
+    f64 toGlobal(
+        f64 dt_p, const Matrix& position, const Matrix& velocity, f64 t_u
+    ) const override;
+};
+
+} 

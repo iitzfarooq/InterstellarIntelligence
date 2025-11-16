@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <set>
+#include <iterator>
 
 inline void req(bool condition, const std::string& message = "Requirement failed") {
     if (!condition) {
