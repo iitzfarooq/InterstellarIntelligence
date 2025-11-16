@@ -13,20 +13,6 @@
 #include "utils/helpers.h"
 #include "simulation/models.h"
 
-template <typename T>
-using shared_span = std::span<std::shared_ptr<T>>;
-
-template <typename T>
-using const_shared_span = std::span<const std::shared_ptr<T>>;
-
-template <typename T>
-using shared_vec = std::vector<std::shared_ptr<T>>;
-
-// Below alias is not valid. std::vector<const T> is not allowed.
-// Reason: std::vector requires its elements to be assignable, and const T is not assignable.
-// template <typename T>
-// using const_shared_vec = std::vector<std::shared_ptr<const T>>;
-
 /**
  * Defines the world in which the simulation takes place.
  * Contains celestial bodies, wormholes, and artifacts.

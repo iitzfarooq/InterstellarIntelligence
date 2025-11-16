@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <set>
 #include <iterator>
+#include <functional>
 
 inline void req(bool condition, const std::string& message = "Requirement failed") {
     if (!condition) {
@@ -51,4 +52,9 @@ std::set<T> operator-(const std::set<T>& a, const std::set<T>& b) {
         std::inserter(result, result.begin())
     );
     return result;
+}
+
+size_t hash_combine(size_t& seed, size_t hash) {
+    seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    return seed;
 }
