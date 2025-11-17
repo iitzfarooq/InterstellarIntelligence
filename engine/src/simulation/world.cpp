@@ -69,14 +69,13 @@ const shared_vec<Artifact>& WorldData::artifacts(i32 id) const {
 
 // ---------------- EnvironmentModel ----------------
 
-EnvironmentModel::EnvironmentModel(
-    const WorldData& world_data, const MathConfig& math_config
-) : world_data_(world_data), math_config_(math_config) {}
+EnvironmentModel::EnvironmentModel(const WorldData& world_data) 
+    : world_data_(world_data) {}
 
 // ------------------- WorldIndex -------------------
 
-WorldIndex::WorldIndex(const WorldData& world_data, const MathConfig& math_config)
-    : world_data_(world_data), math_config_(math_config) {}
+WorldIndex::WorldIndex(const WorldData& world_data)
+    : world_data_(world_data) {}
 
 // ------------------- TimePolicy -------------------
 
@@ -95,8 +94,8 @@ namespace ref {
 // ---------------- ConcreteEnvironment ----------------
 
 ConcreteEnvironment::ConcreteEnvironment(
-    const WorldData& world_data, const MathConfig& math_config
-)   : ConcreteEnvironment::EnvironmentModel(world_data, math_config) {}
+    const WorldData& world_data
+)   : ConcreteEnvironment::EnvironmentModel(world_data) {}
 
 Matrix ConcreteEnvironment::gravity(const Matrix& position, f64 t_u) const {
     Matrix a(2, 1, 0.0f);
@@ -105,9 +104,9 @@ Matrix ConcreteEnvironment::gravity(const Matrix& position, f64 t_u) const {
     for (const auto& body : world_data_.bodies()) {
         auto ri = body->pos(t_u);
         auto Ri = ri - r;
-        auto d = math_config_.normp(Ri, 2);
-        auto inv_d = math_config_.epsilonDiv(1.0f, d*d*d);
-        a = a + Ri * (math_config_.G * body->mass * inv_d);
+        auto d = MathConfig::normp(Ri, 2);
+        auto inv_d = MathConfig::epsilonDiv(1.0f, d*d*d);
+        a = a + Ri * (MathConfig::G * body->mass * inv_d);
     }
 
     return a;
@@ -120,34 +119,33 @@ f64 ConcreteEnvironment::potential(const Matrix& position, f64 t_u) const {
     for (const auto& body : world_data_.bodies()) {
         auto ri = body->pos(t_u);
         auto Ri = ri - r;
-        auto d = math_config_.normp(Ri, 2);
-        phi += math_config_.epsilonDiv(math_config_.G * body->mass, d);
+        auto d = MathConfig::normp(Ri, 2);
+        phi += MathConfig::epsilonDiv(MathConfig::G * body->mass, d);
     }
 
     return phi * -1.0f;
 }
 
 f64 ConcreteEnvironment::gamma(const Matrix& position, const Matrix& velocity, f64 t_u) const {
-    auto v2 = math_config_.dot(velocity, velocity);
+    auto v2 = MathConfig::dot(velocity, velocity);
     auto phi = potential(position, t_u);
-    auto c2 = math_config_.c * math_config_.c;
+    auto c2 = MathConfig::c * MathConfig::c;
 
     return 1.0 / (1.0 + phi / c2 - v2 / (2.0 * c2));
 }
 
 f64 ConcreteEnvironment::invGamma(const Matrix& position, const Matrix& velocity, f64 t_u) const {
-    auto v2 = math_config_.dot(velocity, velocity);
+    auto v2 = MathConfig::dot(velocity, velocity);
     auto phi = potential(position, t_u);
-    auto c2 = math_config_.c * math_config_.c;
+    auto c2 = MathConfig::c * MathConfig::c;
 
     return 1.0 + phi / c2 - v2 / (2.0 * c2);
 }
 
 // ---------------- NaiveWorldIndex ----------------
 
-NaiveWorldIndex::NaiveWorldIndex(
-    const WorldData& world_data, const MathConfig& math_config
-)   : NaiveWorldIndex::WorldIndex(world_data, math_config) {}
+NaiveWorldIndex::NaiveWorldIndex(const WorldData& world_data)
+    : NaiveWorldIndex::WorldIndex(world_data) {}
 
 const shared_vec<CelestialBody> NaiveWorldIndex::queryCelestials(
     const Matrix& position, f64 radius, f64 t_u
@@ -155,7 +153,7 @@ const shared_vec<CelestialBody> NaiveWorldIndex::queryCelestials(
     shared_vec<CelestialBody> result;
     for (const auto& body : world_data_.bodies()) {
         auto body_pos = body->pos(t_u);
-        if (math_config_.normp(body_pos - position, 2) <= radius) {
+        if (MathConfig::normp(body_pos - position, 2) <= radius) {
             result.push_back(body);
         }
     }
@@ -168,7 +166,7 @@ const shared_vec<WormHole> NaiveWorldIndex::queryWormHoles(
     shared_vec<WormHole> result;
     for (const auto& wh : world_data_.wormholes()) {
         auto entry_pos = wh->entry;
-        if (math_config_.normp(entry_pos - position, 2) <= radius) {
+        if (MathConfig::normp(entry_pos - position, 2) <= radius) {
             result.push_back(wh);
         }
     }
@@ -181,7 +179,7 @@ const shared_vec<Artifact> NaiveWorldIndex::queryArtifacts(
     shared_vec<Artifact> result;
     for (const auto& art : world_data_.artifacts()) {
         auto art_pos = art->position;
-        if (math_config_.normp(art_pos - position, 2) <= radius) {
+        if (MathConfig::normp(art_pos - position, 2) <= radius) {
             result.push_back(art);
         }
     }

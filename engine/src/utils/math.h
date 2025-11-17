@@ -68,6 +68,10 @@ struct MathConfig {
         return angle;
     }
 
+    static inline f64 clamp(f64 value, f64 min_val, f64 max_val = MathConfig::infinity)  {
+        return std::max(min_val, std::min(value, max_val));
+    }
+
     // Operations related to vectors
 
     static inline f64 normp(Matrix v, int p = 2)  {
@@ -93,7 +97,7 @@ struct MathConfig {
     // Numerical integration using 4th-order Runge-Kutta method
 
     template <typename T>
-    static inline T integrate(
+    static inline T rk4Integrate(
         const T& x0,
         double t, 
         double dt,

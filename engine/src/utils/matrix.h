@@ -8,6 +8,7 @@
 #include <utility>
 #include <compare>
 #include <initializer_list>
+#include <vector>
 
 #include "utils/types.h"
 #include "utils/helpers.h"
@@ -24,6 +25,7 @@ class Matrix {
 public:
     Matrix(size_t rows, size_t cols, f64 fill = 0.0f);
     Matrix(size_t rows, size_t cols, const std::initializer_list<f64>& values);
+    Matrix(size_t rows, size_t cols, const std::vector<f64>& values);
 
     virtual f64& operator()(size_t i, size_t j);
     virtual const f64& operator()(size_t i, size_t j) const;
@@ -60,6 +62,41 @@ public:
 
     auto operator<=>(const Matrix& other) const = default;
 
+    // ----------------------------------------------------
+    // ------------------ Static Methods ------------------
+    // ----------------------------------------------------
+
+    static Matrix scale(const Matrix& mat, f64 scalar);
+    static Matrix add(const Matrix& a, const Matrix& b);
+    static Matrix mul(const Matrix& a, const Matrix& b);
+
+    friend Matrix operator*(const Matrix& mat, f64 scalar);
+    friend Matrix operator*(f64 scalar, const Matrix& mat);
+    friend Matrix operator+(const Matrix& a, const Matrix& b);
+    friend Matrix operator-(const Matrix& a, const Matrix& b);
+    friend Matrix operator*(const Matrix& a, const Matrix& b);
+    
+    static Matrix eye(size_t size);
+    static Matrix zero(size_t rows, size_t cols);
+    
+    /**
+     * Given a 2x1 matrix, convert it to a 3x1 homogeneous coordinate matrix.
+     */
+    static Matrix toHomogeneous(const Matrix& mat);
+    
+    /**
+     * Given a 3x1 homogeneous coordinate matrix, convert it to a 2x1 matrix.
+     */
+    static Matrix fromHomogeneous(const Matrix& mat);
+    
+    /* ****************************************************************
+     * Following functions create 3x3 affine transformation matrices.
+     *************************************************************** */
+    
+    static Matrix translate2d(f64 tx, f64 ty);
+    static Matrix rotate2d(f64 angle_rad);
+    static Matrix scale2d(f64 sx, f64 sy);
+
 private:
     /**
      * Representation invariant:
@@ -71,15 +108,6 @@ private:
     size_t m, n;
 };
 
-Matrix scale(const Matrix& mat, f64 scalar);
-Matrix add(const Matrix& a, const Matrix& b);
-Matrix mul(const Matrix& a, const Matrix& b);
-
-Matrix operator*(const Matrix& mat, f64 scalar);
-Matrix operator*(f64 scalar, const Matrix& mat);
-Matrix operator+(const Matrix& a, const Matrix& b);
-Matrix operator-(const Matrix& a, const Matrix& b);
-Matrix operator*(const Matrix& a, const Matrix& b);
 
 template <>
 struct std::hash<Matrix> {
@@ -87,24 +115,3 @@ struct std::hash<Matrix> {
         return mat.hash();
     }
 };
-
-Matrix eye(size_t size);
-Matrix zero(size_t rows, size_t cols);
-
-/**
- * Given a 2x1 matrix, convert it to a 3x1 homogeneous coordinate matrix.
- */
-Matrix toHomogeneous(const Matrix& mat);
-
-/**
- * Given a 3x1 homogeneous coordinate matrix, convert it to a 2x1 matrix.
- */
-Matrix fromHomogeneous(const Matrix& mat);
-
-/* ****************************************************************
- * Following functions create 3x3 affine transformation matrices.
- *************************************************************** */
-
-Matrix translate2d(f64 tx, f64 ty);
-Matrix rotate2d(f64 angle_rad);
-Matrix scale2d(f64 sx, f64 sy);

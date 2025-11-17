@@ -60,7 +60,7 @@ Spacecraft::Spacecraft(
     req(fuel >= 0.0f, "Spacecraft fuel cannot be negative.");
     req(!thrust_levels.empty(), "Spacecraft thrust_levels cannot be empty.");
     for (const auto& level : thrust_levels) {
-        req(level > 0.0f, "Each thrust level must be positive.");
+        req(level >= 0.0f, "Each thrust level must be non-negative.");
     }
     req(exhaust_velocity > 0.0f, "Spacecraft exhaust_velocity must be positive.");
 }

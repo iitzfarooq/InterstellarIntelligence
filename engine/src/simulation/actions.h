@@ -26,9 +26,15 @@ struct StateVertex {
     const Matrix v;
     const f64 t_u;
     const f64 fuel;
-    const std::set<u32> collected_artifacts;
+    const uset<u32> collected_artifacts;
 
-    const auto operator<=>(const StateVertex& other) const = default;
+    inline bool operator==(const StateVertex& other) const {
+        return (x == other.x) &&
+               (v == other.v) &&
+               (t_u == other.t_u) &&
+               (fuel == other.fuel) &&
+               (collected_artifacts == other.collected_artifacts);
+    }
 
     inline bool isValid() const {
         return (x.rows() == 2 && x.cols() == 1) &&
@@ -39,7 +45,7 @@ struct StateVertex {
     StateVertex(
         const Matrix& position, const Matrix& velocity,
         f64 t_u, f64 fuel,
-        const std::set<u32>& collected_artifacts = {}
+        const uset<u32>& collected_artifacts = {}
     );
 };
 
@@ -77,8 +83,7 @@ public:
         const EnvironmentModel& env_model,
         const TimePolicy& time_policy,
         const WorldIndex& world_index,
-        const WorldData& world_data,
-        const MathConfig& math_config
+        const WorldData& world_data
     );
     
     virtual ~ActionModel() = default;
@@ -96,7 +101,6 @@ protected:
     const TimePolicy& time_policy_;
     const WorldIndex& world_index_;
     const WorldData& world_data_;
-    const MathConfig& math_config_;
 };
 
 // --------------------- Thrust Actions ---------------------
@@ -105,11 +109,10 @@ struct ThrustAction : public Action {
     const f64 thrust_level;
     const Matrix direction; // normalized 2x1 matrix
     const f64 dt_global;
-    const MathConfig& math_config;
 
     ThrustAction(
         f64 thrust_level, f64 dt_global, 
-        const Matrix& direction, const MathConfig& config
+        const Matrix& direction
     );
 
     inline f64 cost() const override {
@@ -124,7 +127,6 @@ public:
         const TimePolicy& time_policy,
         const WorldIndex& world_index,
         const WorldData& world_data,
-        const MathConfig& math_config,
         const Spacecraft& spacecraft,
         const std::vector<f64>& possible_directions // in radians
     );
@@ -144,39 +146,39 @@ private:
     const std::vector<f64> possible_directions_;
 
 private:
-    struct State {
+    struct IntState {
         Matrix x, v;
-        f64 fuel, t_global;
+        f64 fuel, t_u;
 
-        State() : x(2, 1), v(2, 1), fuel(0.0f), t_global(0.0f) {}
-        State(const Matrix& x, const Matrix& v, f64 fuel, f64 t_global)
-            : x(x), v(v), fuel(fuel), t_global(t_global) {}
+        IntState() : x(2, 1), v(2, 1), fuel(0.0f), t_u(0.0f) {}
+        IntState(const Matrix& x, const Matrix& v, f64 fuel, f64 t_u)
+            : x(x), v(v), fuel(fuel), t_u(t_u) {}
 
-        State operator+(const State& other) const {
+        IntState operator+(const IntState& other) const {
             return {
                 x + other.x,
                 v + other.v,
                 fuel + other.fuel,
-                t_global + other.t_global
+                t_u + other.t_u
             };
         }
 
-        State operator*(f64 scalar) const {
+        IntState operator*(f64 scalar) const {
             return {
                 x * scalar,
                 v * scalar,
                 fuel * scalar,
-                t_global * scalar
+                t_u * scalar
             };
         }
     };
 
-    State findNewState(
+    IntState findIntState(
         const StateVertex& from,
         const ThrustAction& ptr
     ) const;
 
-    const std::set<u32> artifactsHere(
+    const uset<u32> artifactsHere(
         const Matrix& position,
         f64 t_u
     ) const;

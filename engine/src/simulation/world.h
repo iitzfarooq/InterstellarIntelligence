@@ -46,7 +46,7 @@ private:
  */
 class EnvironmentModel {
 public:
-    EnvironmentModel(const WorldData& world_data, const MathConfig& math_config);
+    explicit EnvironmentModel(const WorldData& world_data);
 
     /**
      * Returns the gravitational acceleration at the given position and global time.
@@ -86,7 +86,6 @@ public:
 
 protected:
     const WorldData& world_data_;
-    const MathConfig& math_config_;
 };
 
 /**
@@ -94,7 +93,7 @@ protected:
  */
 class WorldIndex {
 public:
-    WorldIndex(const WorldData& world_data, const MathConfig& math_config);
+    explicit WorldIndex(const WorldData& world_data);
 
     /**
      * Returns entities within the specified radius of the given position at time t_u.
@@ -124,7 +123,6 @@ public:
 
 protected:
     const WorldData& world_data_;
-    const MathConfig& math_config_;
 };
 
 /**
@@ -153,11 +151,13 @@ protected:
     const EnvironmentModel& env_model_;
 };
 
+// --------------------- Frame Representations ---------------------
+
 struct ShipFrame {
     Matrix x, v;
     f64 fuel;
     f64 t_p; 
-    std::set<int> collected_artifacts;
+    uset<int> collected_artifacts;
 };
 
 struct BodyFrame {
@@ -195,7 +195,7 @@ namespace ref {
 
 class ConcreteEnvironment : public ::EnvironmentModel {
 public:
-    explicit ConcreteEnvironment(const WorldData&, const MathConfig&);
+    explicit ConcreteEnvironment(const WorldData&);
 
     Matrix gravity(
         const Matrix& position, f64 t_u
@@ -213,9 +213,7 @@ public:
 
 class NaiveWorldIndex : public ::WorldIndex {
 public:
-    explicit NaiveWorldIndex(
-        const WorldData& world_data, const MathConfig& math_config
-    );
+    explicit NaiveWorldIndex(const WorldData& world_data);
 
     const shared_vec<CelestialBody> queryCelestials(
         const Matrix& position, f64 radius, f64 t_u

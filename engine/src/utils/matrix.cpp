@@ -8,6 +8,11 @@ Matrix::Matrix(size_t rows, size_t cols, const std::initializer_list<f64>& value
     req(values.size() == rows * cols, "Initializer list size does not match matrix dimensions");
 }
 
+Matrix::Matrix(size_t rows, size_t cols, const std::vector<f64>& values) 
+    : m(rows), n(cols), data_(values) {
+    req(values.size() == rows * cols, "Vector size does not match matrix dimensions");
+}
+
 f64& Matrix::operator()(size_t i, size_t j) {
     return data_[i * n + j];
 }
@@ -49,7 +54,7 @@ f64 Matrix::trace() const {
     return tr;
 }
 
-Matrix scale(const Matrix& mat, f64 scalar) {
+Matrix Matrix::scale(const Matrix& mat, f64 scalar) {
     Matrix result(mat.rows(), mat.cols(), 0.0f);
     for (size_t i = 0; i < mat.rows(); ++i) {
         for (size_t j = 0; j < mat.cols(); ++j) {
@@ -59,7 +64,7 @@ Matrix scale(const Matrix& mat, f64 scalar) {
     return result;
 }
 
-Matrix add(const Matrix& a, const Matrix& b) {
+Matrix Matrix::add(const Matrix& a, const Matrix& b) {
     Matrix result(a.rows(), a.cols(), 0.0f);
     for (size_t i = 0; i < a.rows(); ++i) {
         for (size_t j = 0; j < a.cols(); ++j) {
@@ -69,7 +74,7 @@ Matrix add(const Matrix& a, const Matrix& b) {
     return result;
 }
 
-Matrix mul(const Matrix& a, const Matrix& b) {
+Matrix Matrix::mul(const Matrix& a, const Matrix& b) {
     if (a.cols() != b.rows()) {
         throw std::invalid_argument("Matrix dimensions do not match for multiplication");
     }
@@ -85,26 +90,26 @@ Matrix mul(const Matrix& a, const Matrix& b) {
 }
 
 Matrix operator*(const Matrix& mat, f64 scalar) {
-    return scale(mat, scalar);
+    return Matrix::scale(mat, scalar);
 }
 
 Matrix operator*(f64 scalar, const Matrix& mat) {
-    return scale(mat, scalar);
+    return Matrix::scale(mat, scalar);
 }
 
 Matrix operator+(const Matrix& a, const Matrix& b) {
-    return add(a, b);
+    return Matrix::add(a, b);
 }
 
 Matrix operator-(const Matrix& a, const Matrix& b) {
-    return add(a, scale(b, -1.0f));
+    return Matrix::add(a, Matrix::scale(b, -1.0f));
 }
 
 Matrix operator*(const Matrix& a, const Matrix& b) {
-    return mul(a, b);
+    return Matrix::mul(a, b);
 }
 
-Matrix toHomogeneous(const Matrix& mat) {
+Matrix Matrix::toHomogeneous(const Matrix& mat) {
     if (mat.rows() != 2 || mat.cols() != 1) {
         throw std::invalid_argument("Input matrix must be of size 2x1");
     }
@@ -117,7 +122,7 @@ Matrix toHomogeneous(const Matrix& mat) {
     return result;
 }
 
-Matrix fromHomogeneous(const Matrix& mat) {
+Matrix Matrix::fromHomogeneous(const Matrix& mat) {
     if (mat.rows() != 3 || mat.cols() != 1) {
         throw std::invalid_argument("Input matrix must be of size 3x1");
     }
@@ -145,14 +150,14 @@ Matrix zero(size_t rows, size_t cols) {
     return Matrix(rows, cols, 0.0f);
 }
 
-Matrix translate2d(f64 tx, f64 ty) {
+Matrix Matrix::translate2d(f64 tx, f64 ty) {
     Matrix result = eye(3);
     result(0, 2) = tx;
     result(1, 2) = ty;
     return result;
 }
 
-Matrix rotate2d(f64 angle_rad) {
+Matrix Matrix::rotate2d(f64 angle_rad) {
     Matrix result = eye(3);
     f64 c = std::cos(angle_rad);
     f64 s = std::sin(angle_rad);
@@ -163,7 +168,7 @@ Matrix rotate2d(f64 angle_rad) {
     return result;
 }
 
-Matrix scale2d(f64 sx, f64 sy) {
+Matrix Matrix::scale2d(f64 sx, f64 sy) {
     Matrix result = eye(3);
     result(0, 0) = sx;
     result(1, 1) = sy;

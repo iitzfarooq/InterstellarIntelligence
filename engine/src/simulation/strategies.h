@@ -36,7 +36,7 @@ struct TrajectoryStrategy {
  * AF(a, b, omega, phi, center, angle): 
  *   x = a * cos(omega * t + phi)
  *   y = b * sin(omega * t + phi)
- *   rotate2d(angle) * [x; y; 1] + center
+ *   Matrix::rotate2d(angle) * [x; y; 1] + center
  */
 struct EllipticalOrbit : public TrajectoryStrategy {
     const f64 a, b, omega, phi;
@@ -64,8 +64,8 @@ struct EllipticalOrbit : public TrajectoryStrategy {
         point(0, 0) = x;
         point(1, 0) = y;
 
-        Matrix rotated = rotate2d(angle) * point;
-        Matrix translated = center + fromHomogeneous(rotated);
+        Matrix rotated = Matrix::rotate2d(angle) * point;
+        Matrix translated = center + Matrix::fromHomogeneous(rotated);
         return translated;
     }
 };
