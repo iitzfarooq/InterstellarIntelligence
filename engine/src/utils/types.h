@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_set>
+#include <unordered_map>
 
 using u32 = uint32_t;
 using f32 = float;
@@ -29,5 +30,16 @@ using shared_vec = std::vector<std::shared_ptr<T>>;
 // template <typename T>
 // using const_shared_vec = std::vector<std::shared_ptr<const T>>;
 
-template <typename T>
+template <
+    typename T,
+    typename Hash = std::hash<T>,
+    typename KeyEqual = std::equal_to<T>
+>
 using uset = std::unordered_set<T>;
+
+template <
+    typename K, 
+    typename V, 
+    typename Hash = std::hash<K>,
+    typename KeyEqual = std::equal_to<K>
+> using umap = std::unordered_map<K, V, Hash, KeyEqual>;

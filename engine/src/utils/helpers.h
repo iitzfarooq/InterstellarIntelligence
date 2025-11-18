@@ -84,7 +84,7 @@ inline uset<T> operator-(const uset<T>& a, const uset<T>& b) {
 }
 
 
-inline size_t hash_combine(size_t& seed, size_t hash) {
+inline size_t hash_combine(size_t seed, size_t hash) {
     seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     return seed;
 }

@@ -47,6 +47,9 @@ struct StateVertex {
         f64 t_u, f64 fuel,
         const uset<u32>& collected_artifacts = {}
     );
+
+    StateVertex(const StateVertex& other) = default;
+    StateVertex(StateVertex&& other) = default;
 };
 
 template <>
@@ -57,12 +60,12 @@ struct std::hash<StateVertex> {
         auto flt_hasher = std::hash<f64>();
         auto uint_hasher = std::hash<u32>();
 
-        hash_combine(h, mat_hasher(sv.x));
-        hash_combine(h, mat_hasher(sv.v));
-        hash_combine(h, flt_hasher(sv.t_u));
-        hash_combine(h, flt_hasher(sv.fuel));
+        h = hash_combine(h, mat_hasher(sv.x));
+        h = hash_combine(h, mat_hasher(sv.v));
+        h = hash_combine(h, flt_hasher(sv.t_u));
+        h = hash_combine(h, flt_hasher(sv.fuel));
         for (const auto& artifact_id : sv.collected_artifacts) {
-            hash_combine(h, uint_hasher(artifact_id));
+            h = hash_combine(h, uint_hasher(artifact_id));
         }
         return h;
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+#include <cmath>
 #include "utils/matrix.h"
 #include "utils/types.h"
 
@@ -69,3 +71,38 @@ struct EllipticalOrbit : public TrajectoryStrategy {
         return translated;
     }
 };
+
+/**
+ * Abstract base class for SSSP Solver strategies.
+ * Defines the interface for push/pop operations on vertices. 
+ */
+template <typename Vertex>
+struct GreedyStrategy {
+    virtual ~GreedyStrategy() = default;
+    virtual void push(const Vertex& vertex) = 0;
+    virtual Vertex pop() = 0;
+    virtual bool empty() const = 0;
+};
+
+/**
+ * BFS Solver strategy implementation using a queue.
+ */
+template <typename Vertex>
+struct BFSSolver : public GreedyStrategy<Vertex> {
+    std::queue<Vertex> queue;
+
+    inline void push(const Vertex& vertex) override {
+        queue.push(vertex);
+    }
+
+    inline Vertex pop() override {
+        Vertex front = queue.front();
+        queue.pop();
+        return front;
+    }
+
+    inline bool empty() const override {
+        return queue.empty();
+    }
+};
+

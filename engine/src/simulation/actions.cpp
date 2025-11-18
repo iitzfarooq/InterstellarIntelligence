@@ -95,10 +95,10 @@ std::optional<StateVertex> ThrustActionModel::apply(
 
     auto s_new = findIntState(from, *ptr);
     
-    auto x = s_new.x;
-    auto v = s_new.v;
-    auto t_u = s_new.t_u;
-    auto fuel = MathConfig::clamp(s_new.fuel, 0.0f);
+    auto x         = s_new.x;
+    auto v         = s_new.v;
+    auto t_u       = s_new.t_u;
+    auto fuel      = MathConfig::clamp(s_new.fuel, 0.0f);
     auto artifacts = from.collected_artifacts | artifactsHere(x, t_u);
     
     StateVertex new_state(x, v, t_u, fuel, artifacts);

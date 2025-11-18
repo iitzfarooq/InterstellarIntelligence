@@ -72,6 +72,10 @@ struct MathConfig {
         return std::max(min_val, std::min(value, max_val));
     }
 
+    static inline f64 round(f64 value)  {
+        return std::round(value);
+    }
+
     // Operations related to vectors
 
     static inline f64 normp(Matrix v, int p = 2)  {
@@ -109,6 +113,18 @@ struct MathConfig {
         T k4 = f(x0 + k3 * dt, t + dt);
 
         return x0 + (k1 + k2 * 2.0 + k3 * 2.0 + k4) * (dt / 6.0);
+    }
+
+    // operations related to general matrices.
+
+    static inline Matrix round(const Matrix& mat)  {
+        Matrix result(mat.rows(), mat.cols());
+        for (size_t i = 0; i < mat.rows(); ++i) {
+            for (size_t j = 0; j < mat.cols(); ++j) {
+                result(i, j) = std::round(mat(i, j));
+            }
+        }
+        return result;
     }
 
     // more to be added later.
