@@ -110,6 +110,7 @@ struct StateAction {
         const std::shared_ptr<Action>& action
     ) : state(state), action(action) {}
     
+    StateAction() = default;
     StateAction(const StateAction& other) = default;
     StateAction(StateAction&& other) = default;
     StateAction& operator=(const StateAction& other) = default;

@@ -22,8 +22,8 @@ std::vector<StateAction> Solver::reconstruct(
     const umap<DiscreteState, StateAction>& parent_map
 ) const {
     std::vector<StateAction> path;
-    auto v = std::make_shared<StateVertex>(goal);
-    auto a = std::make_shared<Action>(nullptr);
+    std::shared_ptr<StateVertex> v = std::make_shared<StateVertex>(goal);
+    std::shared_ptr<Action>      a = nullptr;
 
     while (true) {
         path.push_back(StateAction(v, a));
@@ -43,12 +43,14 @@ std::vector<StateAction> Solver::reconstruct(
 
 template <typename R, typename T, typename BinOp>
 T foldLeft(R&& range, T init, BinOp op) {
-    return std::ranges::for_each(
+    std::ranges::for_each(
         range,
         [&init, &op] (const auto& value) {
             init = op(std::forward<T>(init), value);
         }
     );
+
+    return init;
 }
 
 f64 computeCost(const std::vector<StateAction>& path) {

@@ -94,7 +94,7 @@ struct Spacecraft : Entity {
     const f64 mass; // excluding the fuel
     const f64 fuel;
     const std::vector<f64> thrust_levels;
-    const f64 exhaust_velocity;
+    const f64 exhaust_speed;
 
     const f64 min_fuel_to_land;
 

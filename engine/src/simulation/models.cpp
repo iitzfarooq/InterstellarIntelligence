@@ -40,7 +40,7 @@ EllipticalOrbit::EllipticalOrbit(
     req(omega > 0.0f, "EllipticalOrbit angular velocity omega must be positive.");
     auto [m, n] = center.shape();
     req(m == 2 && n == 1, "EllipticalOrbit center must be a 2x1 matrix.");
-    req(angle >= 0.0f && angle < 2*PI, "EllipticalOrbit angle must be in [0, 2π).");
+    req(angle >= 0.0f && angle < 2* MathConfig::pi, "EllipticalOrbit angle must be in [0, 2π).");
 }
 
 Artifact::Artifact(u32 id, const Matrix &position) 
@@ -54,7 +54,7 @@ Spacecraft::Spacecraft(
     u32 id, f64 mass, f64 fuel, f64 min_fuel_to_land,
         const std::vector<f64>& thrust_levels, f64 exhaust_velocity
 )   : Entity(id), mass(mass), fuel(fuel), min_fuel_to_land(min_fuel_to_land), 
-    thrust_levels(thrust_levels), exhaust_velocity(exhaust_velocity) {
+    thrust_levels(thrust_levels), exhaust_speed(exhaust_velocity) {
         
     req(mass > 0.0f, "Spacecraft mass must be positive.");
     req(fuel >= 0.0f, "Spacecraft fuel cannot be negative.");

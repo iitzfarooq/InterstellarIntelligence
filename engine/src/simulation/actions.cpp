@@ -148,7 +148,7 @@ ThrustActionModel::IntState ThrustActionModel::findIntState(
         ds.x = s.v * y;                                // dx/dτ = v * (dt_u/dτ)
         ds.v = (a_g + a_th) * y;                       // dv/dτ = (dv/dt_u) (dt_u/dτ)
         ds.fuel = MathConfig::safeDiv(
-            -ptr.thrust_level, spacecraft_.exhaust_velocity, 0.0f
+            -ptr.thrust_level, spacecraft_.exhaust_speed, 0.0f
         );                                             // dfuel/dτ
         ds.t_u = y;                                    // dt_u/dτ
         

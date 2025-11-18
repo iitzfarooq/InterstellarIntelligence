@@ -23,6 +23,7 @@
  */
 class Matrix {
 public:
+    Matrix() = default;
     Matrix(size_t rows, size_t cols, f64 fill = 0.0f);
     Matrix(size_t rows, size_t cols, const std::initializer_list<f64>& values);
     Matrix(size_t rows, size_t cols, const std::vector<f64>& values);
@@ -53,7 +54,6 @@ public:
      */
     size_t hash() const;
 
-    Matrix() = delete;
     Matrix(const Matrix&) = default;
     Matrix(Matrix&&) = default;
     Matrix& operator=(const Matrix&) = default;
@@ -104,8 +104,8 @@ private:
      * - data_.size() == m * n, m -> rows, n -> columns
      */
 
-    std::vector<f64> data_;
-    size_t m, n;
+    std::vector<f64> data_ = {};
+    size_t m = 0, n = 0;
 };
 
 
