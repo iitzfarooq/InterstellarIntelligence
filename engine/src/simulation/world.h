@@ -160,7 +160,7 @@ struct ShipFrame {
     Matrix x, v;
     f64 fuel;
     f64 t_p; 
-    uset<int> collected_artifacts;
+    uset<u32> collected_artifacts;
 };
 
 struct BodyFrame {

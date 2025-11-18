@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <variant>
+#include <filesystem>
 #include "utils/types.h"
 #include "utils/matrix.h"
 
@@ -26,7 +27,7 @@ using BodyConfig = std::variant<StationaryBodyConfig, TrajectoryConfig>;
 
 struct WormHoleConfig {
     u32 id;
-    std::vector<u32> entry, exit;
+    std::vector<f64> entry, exit;
     f64 t_open;
     f64 t_close;
 };
@@ -40,6 +41,8 @@ struct WorldConfig {
     std::vector<BodyConfig> bodies;
     std::vector<WormHoleConfig> wormholes;
     std::vector<ArtifactConfig> artifacts;
+
+    f64 max_radius;
 };
 
 struct TimeConfig {
@@ -55,19 +58,34 @@ struct QuantizationConfig {
 };
 
 struct SpaceCraftConfig {
+    u32 id;
     f64 mass;
     f64 max_fuel;
     std::vector<f64> thrust_levels;
     f64 exhaust_speed;
 
     std::vector<f64> possible_directions; // in radians
-    std::vector<f64> initial_position;
-    std::vector<f64> initial_velocity;
 };
 
-struct EngineConfig {
+struct StateConfig {
+    std::vector<f64> position;
+    std::vector<f64> velocity;
+    f64 fuel;
+};
+
+struct SimulationConfig {
     WorldConfig world_config;
     TimeConfig time_config;
     QuantizationConfig quantization_config;
     SpaceCraftConfig spacecraft_config;
+
+    StateConfig initial_state;
+    u32 k;
+};
+
+namespace fs = std::filesystem;
+
+struct RuntimeConfig {
+    u64 random_seed;
+    fs::path log_directory;
 };
