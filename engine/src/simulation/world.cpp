@@ -193,29 +193,19 @@ SimpleTimePolicy::SimpleTimePolicy(
 ) : SimpleTimePolicy::TimePolicy(env_model, tmax, dt_u) {}
 
 f64 SimpleTimePolicy::toProper(f64 dt_u, const Matrix& position, const Matrix& velocity, f64 t_u) const {
-    // Euler integration
-    f64 dt_p = 0.0;
-    f64 step = 0.01;
+    auto f = [&](f64 tau, f64 t_ui) {
+        return env_model_.invGamma(position, velocity, t_ui);
+    };
 
-    for (f64 t = t_u; t < t_u + dt_u; t += step) {
-        auto g = env_model_.invGamma(position, velocity, t);
-        dt_p += step * g;
-    }
-
-    return dt_p;
+    return MathConfig::rk4Integrate<f64>(0.0f, t_u, dt_u, f);
 }
 
 f64 SimpleTimePolicy::toGlobal(f64 dt_p, const Matrix& position, const Matrix& velocity, f64 t_u) const {
-    // Euler integration
-    f64 dt_u = 0.0;
-    f64 step = 0.01;
+    auto f = [&](f64 t_ui, f64 tau) {
+        return env_model_.gamma(position, velocity, t_ui);
+    };
 
-    for (f64 t = t_u; dt_u < dt_p; t += step) {
-        auto g = env_model_.gamma(position, velocity, t);
-        dt_u += step * g;
-    }
-
-    return dt_u;
+    return MathConfig::rk4Integrate<f64>(t_u, 0.0f, dt_p, f) - t_u;
 }
 
 } 
