@@ -22,7 +22,8 @@ public:
     WorldData(
         shared_vec<CelestialBody> bodies,
         shared_vec<WormHole> wormholes,
-        shared_vec<Artifact> artifacts
+        shared_vec<Artifact> artifacts,
+        f64 max_radius
     );
 
     /**
@@ -35,10 +36,12 @@ public:
     const shared_vec<WormHole>& wormholes(i32 id = -1) const;
     const shared_vec<Artifact>& artifacts(i32 id = -1) const;
 
+    inline f64 max_radius() const { return max_radius_; }
 private:
     shared_vec<CelestialBody> bodies_;
     shared_vec<WormHole> wormholes_;
     shared_vec<Artifact> artifacts_;
+    f64 max_radius_;
 };
 
 /**

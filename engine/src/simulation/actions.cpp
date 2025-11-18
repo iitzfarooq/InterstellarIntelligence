@@ -85,6 +85,17 @@ shared_vec<Action> ThrustActionModel::enumerate(
     return actions;
 }
 
+bool ThrustActionModel::checkConstraints(
+    const StateVertex& state
+) const {
+    return !detectCollision(state.x, state.t_u) &&
+            (state.isValid()) &&
+            (state.t_u <= time_policy_.tmax()) &&
+            (world_data_.max_radius() >= MathConfig::normp(state.x, 2));
+
+    return true;
+}
+
 std::optional<StateVertex> ThrustActionModel::apply(
     const StateVertex& from, std::shared_ptr<Action> action
 ) {
@@ -102,13 +113,11 @@ std::optional<StateVertex> ThrustActionModel::apply(
     auto artifacts = from.collected_artifacts | artifactsHere(x, t_u);
     
     StateVertex new_state(x, v, t_u, fuel, artifacts);
-    if (
-        !new_state.isValid() || detectCollision(x, t_u) || t_u > time_policy_.tmax()
-    ) {
-        return std::nullopt;
+    if (checkConstraints(new_state)) {
+        return new_state;
     }
-
-    return new_state;
+    
+    return std::nullopt;
 }
 
 // Helper methods for ThrustActionModel
@@ -177,7 +186,7 @@ const uset<u32> ThrustActionModel::artifactsHere(
     return uset<u32>(view.begin(), view.end());
 }
 
-const bool ThrustActionModel::detectCollision(
+bool ThrustActionModel::detectCollision(
     const Matrix& position,
     f64 t_u
 ) const {

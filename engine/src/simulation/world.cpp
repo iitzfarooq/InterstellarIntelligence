@@ -5,10 +5,12 @@
 WorldData::WorldData(
     shared_vec<CelestialBody> bodies,
     shared_vec<WormHole> wormholes,
-    shared_vec<Artifact> artifacts
+    shared_vec<Artifact> artifacts,
+    f64 max_radius
 ) : bodies_(std::move(bodies)),
     wormholes_(std::move(wormholes)),
-    artifacts_(std::move(artifacts)) {}
+    artifacts_(std::move(artifacts)),
+    max_radius_(max_radius) {}
 
 const shared_vec<CelestialBody>& WorldData::bodies(i32 id) const {
     if (id == -1) {

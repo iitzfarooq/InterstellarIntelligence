@@ -186,8 +186,12 @@ private:
         f64 t_u
     ) const;
 
-    const bool detectCollision(
+    bool detectCollision(
         const Matrix& position,
         f64 t_u
+    ) const;
+
+    bool checkConstraints(
+        const StateVertex& state
     ) const;
 };
